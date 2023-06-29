@@ -15,8 +15,7 @@ We support three kinds of control maps at this time.
 
 # Env
 
-- torch version: 1.13.1+cu117
-
+The model has been tesed in torch version: `1.13.1+cu117`
 ```
 pip3 install -r requirements.txt
 ```
@@ -29,7 +28,7 @@ python3 inference.py --prompt "a bear walking through stars, artstation" --input
 ```
 
 More args:
-- `--input_video`: path of mp4.
+- `--input_video`: path of input video(mp4 format).
 - `--num_sample_frames`: nums of frames to generate. (recommend > 8).
 - `--sampling_rate`: skip sampling from the input video.
 
@@ -39,7 +38,7 @@ More args:
 
 - `--inference_step, --guidance_scale, --height, --width, --prompt`: same as other T2I model.
 
-If the automatically downloading not work, the models weights can be found in:
+If the automatically downloading not work, the models weights can be downloaded from:
 - [depth_control_model](https://huggingface.co/wf-genius/controlavideo-depth)
 - [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny)
 - [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed)
@@ -58,11 +57,11 @@ If the automatically downloading not work, the models weights can be found in:
 ```
 
 # Acknowledgement
-This repository borrows heavily from [Diffusers](https://github.com/huggingface/diffusers), [ControlNet](https://github.com/lllyasviel/ControlNet), [Tune-A-Video](https://github.com/showlab/Tune-A-Video), thanks for open-sourcing!
+This repository borrows heavily from [Diffusers](https://github.com/huggingface/diffusers), [ControlNet](https://github.com/lllyasviel/ControlNet), [Tune-A-Video](https://github.com/showlab/Tune-A-Video), thanks for open-sourcing! This work was done in Bytedance, thanks for the cooperators! 
 
 
 # Future Plan
-- support lora/dreambooth generation.
+- support lora/dreambooth.
 - support mask generation.
 - optical flow enhancement.
 - Any other methods to improve the model. It's also welcomed to contribute any applications based on our models, please propose a PR.
