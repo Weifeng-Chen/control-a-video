@@ -1,0 +1,8 @@
+diffusers==0.14.0
+transformers==4.27.3
+accelerate==0.18.0
+xformers==0.0.16
+imageio==2.27.0
+decord==0.6.0
+opencv-python==4.7.0.72
+einops==0.6.0
