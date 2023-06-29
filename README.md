@@ -1,10 +1,10 @@
 # control-a-video
 <!-- <img src="basketball.gif" width="256"> -->
-Official Implementation of ["Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models"](https://arxiv.org/abs/2305.13840s). More demos in [Project Page](https://controlavideo.github.io).
+Official Implementation of ["Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models"](https://arxiv.org/abs/2305.13840), which is a text-based vid2vid model similar to [GEN-1](https://research.runwayml.com/gen1), more showcases in [Project Page](https://controlavideo.github.io).
 
-The models&code can only be used for non-commercial/research purpose.
+The models and code can only be used for non-commercial/research purpose.
 
-We support three kinds of control maps at this time. 
+Similar to Controlnet, We otain the condition maps from another video, and we support three kinds of control maps at this time. 
 
 |depth control| canny control | hed control | 
 |:-:|:-:|:-:|
@@ -13,7 +13,7 @@ We support three kinds of control maps at this time.
 
 # Setup
 
-The model has been tesed in torch version: `1.13.1+cu117`
+The model has been tesed in torch version: `1.13.1+cu117`, simply run
 ```
 pip3 install -r requirements.txt
 ```
@@ -38,13 +38,10 @@ More args:
 
 - `--inference_step, --guidance_scale, --height, --width, --prompt`: same as other T2I model.
 
-If the automatically downloading not work, the models weights can be downloaded from:
-- [depth_control_model](https://huggingface.co/wf-genius/controlavideo-depth)
-- [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny)
-- [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed)
+If the automatical downloading not work, the models weights can be downloaded from: [depth_control_model](https://huggingface.co/wf-genius/controlavideo-depth), [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny), [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed).
 
 ## 2. Pipeline
-1. Our model firstly generates the first frame, and then generate the subsquent frames condition on the first frame. Thus, we can generate the first frame for preview. 
+(1) Our model firstly generates the first frame, which can be used fro preview. 
 ```
 first_frame = video_controlnet_pipe(
         controlnet_hint=control_maps[:,:,0:1,:,:],
@@ -61,8 +58,7 @@ if isinstance(first_frame, list):
     first_frame = first_frame[0]    # PIL image, can be shown in jupyter.
 ```
 
-2. Once We get the first frame, We 
-
+(2) Once We get the first frame, We generate the subsquent frames condition on the first frame.
 ```
 out = video_controlnet_pipe(
         controlnet_hint= control_maps[:,:,:num_each_frames,:,:],
@@ -79,7 +75,7 @@ out = video_controlnet_pipe(
 ).images[0][1:] # drop the first frame
 ```
 
-3. You can set `first_frame_output=out[-1]` and generate longer videos. (Note that the `controlnet_hint` and `images` shoule be the coressponding frames.) This operation is still under experiment and it may collaspe after 3 or 4 iterations. 
+(3) You can set `first_frame_output=out[-1]` and generate longer videos. (Note that the `controlnet_hint` and `images` shoule be the coressponding frames.) This operation is still under experiment and it may collaspe after 3 or 4 iterations. 
 
 # Citation
 ```
