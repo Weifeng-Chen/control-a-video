@@ -38,11 +38,11 @@ Args:
 
 - `--inference_step, --guidance_scale, --height, --width, --prompt`: same as other T2I model.
 
-If the automatical downloading not work, the models weights can be downloaded from: [depth_control_model](https://huggingface.co/wf-genius/controlavideo-depth), [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny), [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed).
+If the automatic downloading not work, the models weights can be downloaded from: [depth_control_model](https://huggingface.co/wf-genius/controlavideo-depth), [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny), [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed).
 
 ## 2. Pipeline
 ### Inference
-(1) Our model firstly generates the first frame, which can be used fro preview. 
+(1) Our model firstly generates the first frame, which can be used for preview as well.
 ```
 first_frame = video_controlnet_pipe(
         controlnet_hint=control_maps[:,:,0:1,:,:],
@@ -71,21 +71,21 @@ out = video_controlnet_pipe(
         guidance_scale=10,
         generator=[torch.Generator(device="cuda").manual_seed(seed)],
         single_frame_noise_addition_scale = 1.5,        
-        first_frame_output= first_frame,   # provide the first frame
+        first_frame_output= first_frame,   # the first frame
         init_noise_by_residual_thres = 0.1,
 ).images[0][1:] # drop the first frame
 ```
 
-(3) You can set `first_frame_output=out[-1]` and generate longer videos. (Note that the `controlnet_hint` and `images` shoule be the coressponding frames, and the frst item should be same as `first_frame_output`) This operation is still under experiment and it may collaspe after 3 or 4 iterations. 
+(3) You can set `first_frame_output=out[-1]` and generate longer videos. (Note that the `controlnet_hint` and `images` shoule be the coressponding frames, and the first item should be same as `first_frame_output`) This operation is still under experiment and it may collaspe after 3 or 4 iterations. 
 
 
 ### Replace the 2d model
-Since we freeze the 2d model, you can replace it with any other model based on `stable-diffusion-v1-5`.
+Since we freeze the 2d model, you can replace it with any other model based on `stable-diffusion-v1-5` to generate custom-style videos. 
 
 ```
-state_dict_path_condidates = glob.glob(os.path.join(pipeline_path, 'unet', "*.bin"))
-state_dict = torch.load(state_dict_path_condidates[0], map_location="cpu")
-unet.load_2d_state_dict(state_dict=state_dict)
+state_dict_path = os.path.join(pipeline_model_path, "unet", "diffusion_pytorch_model*.bin")
+state_dict = torch.load(state_dict_path, map_location="cpu")
+video_controlnet_pipe.unet.load_2d_state_dict(state_dict=state_dict)    # reload 2d model.
 ```
 
 # Citation
