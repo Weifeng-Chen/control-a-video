@@ -1,10 +1,8 @@
 # control-a-video
 <!-- <img src="basketball.gif" width="256"> -->
-Official Implementation of "Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models". The models&code can only be used for non-commercial purpose.
+Official Implementation of ["Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models"](https://arxiv.org/abs/2305.13840s). More demos in [Project Page](https://controlavideo.github.io).
 
-- [Paper Page](https://arxiv.org/abs/2305.13840)
-
-- [Project Page](https://controlavideo.github.io)
+The models&code can only be used for non-commercial/research purpose.
 
 We support three kinds of control maps at this time. 
 
@@ -13,7 +11,7 @@ We support three kinds of control maps at this time.
 |<img src="videos/depth_a_bear_walking_through_stars.gif" width="200"><br> a bear walking through stars |<img src="videos/canny_a_dog_comicbook.gif" width="200"><br> a dog, comicbook style |<img src="videos/hed_a_person_riding_a_horse_jumping_over_an_obstacle_watercolor_style.gif" width="200"><br> person riding horse, watercolor|
 
 
-# Env
+# Setup
 
 The model has been tesed in torch version: `1.13.1+cu117`
 ```
@@ -21,6 +19,8 @@ pip3 install -r requirements.txt
 ```
 
 # Usage
+
+## 1. Quick Use
 We provide a demo for quick testing in this repo, simply running:
 
 ```
@@ -43,6 +43,43 @@ If the automatically downloading not work, the models weights can be downloaded 
 - [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny)
 - [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed)
 
+## 2. Pipeline
+1. Our model firstly generates the first frame, and then generate the subsquent frames condition on the first frame. Thus, we can generate the first frame for preview. 
+```
+first_frame = video_controlnet_pipe(
+        controlnet_hint=control_maps[:,:,0:1,:,:],
+        prompt=testing_prompt,
+        num_inference_steps=20,
+        width=w,
+        height=h,
+        guidance_scale=10,
+        num_images_per_prompt=1,
+        generator=[torch.Generator(device="cuda").manual_seed(seed)],
+        fix_first_frame=False,
+).images[0]
+if isinstance(first_frame, list):
+    first_frame = first_frame[0]    # PIL image, can be shown in jupyter.
+```
+
+2. Once We get the first frame, We 
+
+```
+out = video_controlnet_pipe(
+        controlnet_hint= control_maps[:,:,:num_each_frames,:,:],
+        images= v2v_input_frames[:,:,:num_each_frames,:,:],
+        prompt=testing_prompt,
+        num_inference_steps=20,
+        width=w,
+        height=h,
+        guidance_scale=10,
+        generator=[torch.Generator(device="cuda").manual_seed(seed)],
+        single_frame_noise_addition_scale = 1.5,        
+        first_frame_output= first_frame,   # provide the first frame
+        init_noise_by_residual_thres = 0.1,
+).images[0][1:] # drop the first frame
+```
+
+3. You can set `first_frame_output=out[-1]` and generate longer videos. (Note that the `controlnet_hint` and `images` shoule be the coressponding frames.) This operation is still under experiment and it may collaspe after 3 or 4 iterations. 
 
 # Citation
 ```
