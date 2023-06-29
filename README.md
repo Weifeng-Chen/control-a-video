@@ -39,6 +39,10 @@ More args:
 
 - `--inference_step, --guidance_scale, --height, --width, --prompt`: same as other T2I model.
 
+If the automatically downloading not work, the models weights can be found in:
+- [depth_control_model](https://huggingface.co/wf-genius/controlavideo-depth)
+- [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny)
+- [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed)
 
 
 # Citation
@@ -61,5 +65,4 @@ This repository borrows heavily from [Diffusers](https://github.com/huggingface/
 - support lora/dreambooth generation.
 - support mask generation.
 - optical flow enhancement.
-
-It's also welcomed to contribute any applications based on our models, please propose a PR.
+- Any other methods to improve the model. It's also welcomed to contribute any applications based on our models, please propose a PR.
