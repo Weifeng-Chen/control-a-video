@@ -15,7 +15,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--control_mode', type=str, default='depth', help='hed, canny, depth')
+parser.add_argument('--control_mode', type=str, default='depth', help='support: hed, canny, depth')
 parser.add_argument('--inference_step', type=int, default=20, help='how many steps to inference')
 parser.add_argument('--guidance_scale', type=float, default=7.5, help='how many steps to inference')
 parser.add_argument('--seed',  type=int, default=1, help='seed')
