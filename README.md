@@ -83,7 +83,7 @@ out = video_controlnet_pipe(
 Since we freeze the 2d model, you can replace it with any other model based on `stable-diffusion-v1-5` to generate custom-style videos. 
 
 ```
-state_dict_path = os.path.join(pipeline_model_path, "unet", "diffusion_pytorch_model*.bin")
+state_dict_path = os.path.join(pipeline_model_path, "unet", "diffusion_pytorch_model.bin")
 state_dict = torch.load(state_dict_path, map_location="cpu")
 video_controlnet_pipe.unet.load_2d_state_dict(state_dict=state_dict)    # reload 2d model.
 ```
