@@ -1,6 +1,7 @@
 # control-a-video
 <!-- <img src="basketball.gif" width="256"> -->
-Official Implementation of "Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models"
+Official Implementation of "Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models". The models&code can only be used for non-commercial purpose.
+
 - [Paper Page](https://arxiv.org/abs/2305.13840)
 
 - [Project Page](https://controlavideo.github.io)
