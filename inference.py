@@ -30,14 +30,15 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--control_mode', type=str, default='depth', help='support: hed, canny, depth')
-parser.add_argument('--inference_step', type=int, default=20, help='how many steps to inference')
-parser.add_argument('--guidance_scale', type=float, default=7.5, help='how many steps to inference')
+parser.add_argument('--inference_step', type=int, default=20, help='denoising steps for inference')
+parser.add_argument('--guidance_scale', type=float, default=7.5, help='guidance scale')
 parser.add_argument('--seed',  type=int, default=1, help='seed')
-parser.add_argument('--num_sample_frames', type=int, default=8, help='how many frames to inference')
-parser.add_argument('--sampling_rate', type=int, default=3, help='how many frames to inference')
-parser.add_argument('--height', type=int, default=512, help='ouput res')
-parser.add_argument('--width', type=int, default=512, help='ouput res')
-parser.add_argument('--video_scale', type=float, default=1.5, help='how many steps to inference')
+parser.add_argument('--num_sample_frames', type=int, default=8, help='total frames to inference')
+parser.add_argument('--each_sample_frame', type=int, default=8, help='auto-regressive generation for each iteration')
+parser.add_argument('--sampling_rate', type=int, default=3, help='skip sampling from input video')
+parser.add_argument('--height', type=int, default=512, help='ouput height')
+parser.add_argument('--width', type=int, default=512, help='ouput width')
+parser.add_argument('--video_scale', type=float, default=1.5, help='video smoothness scale')
 parser.add_argument('--init_noise_thres', type=float, default=0.1, help='thres for res noise init')
 parser.add_argument('--input_video',type=str, default='bear.mp4')
 parser.add_argument('--prompt',type=str, default="a bear walking through stars, artstation")
@@ -55,6 +56,7 @@ video_scale = args.video_scale
 init_noise_thres = args.init_noise_thres
 video_path = args.input_video
 testing_prompt = [args.prompt]
+each_sample_frame = args.each_sample_frame
 
 
 control_net_path = f"wf-genius/controlavideo-{control_mode}"
@@ -113,23 +115,27 @@ v2v_input_frames = rearrange(v2v_input_frames, '(b f) c h w -> b c f h w ', f=nu
 
 
 out = []
-out1 = video_controlnet_pipe(
-        controlnet_hint= control_maps[:,:,:num_sample_frames,:,:],
-        images= v2v_input_frames[:,:,:num_sample_frames,:,:],
-        prompt=testing_prompt,
-        num_inference_steps=num_inference_steps,
-        width=w,
-        height=h,
-        guidance_scale=guidance_scale,
-        generator=[torch.Generator(device="cuda").manual_seed(seed)],
-        video_scale = video_scale,  # per-frame as negative (>= 1 or set 0)
-        init_noise_by_residual_thres = init_noise_thres,    # residual-based init. larger thres ==> more smooth.
-        controlnet_conditioning_scale=1.0,
-        fix_first_frame=True,
-        in_domain=True, # whether to use the video model to generate the first frame.
-)
-out1 = out1.images[0][1:]    # drop the first frame
-out.extend(out1)
+for i in range(num_sample_frames//each_sample_frame):
+    out1 = video_controlnet_pipe(
+            # controlnet_hint= control_maps[:,:,:each_sample_frame,:,:],
+            # images= v2v_input_frames[:,:,:each_sample_frame,:,:],
+            controlnet_hint=control_maps[:,:,i*each_sample_frame-1:(i+1)*each_sample_frame-1,:,:] if i>0 else control_maps[:,:,:each_sample_frame,:,:],
+            images=v2v_input_frames[:,:,i*each_sample_frame-1:(i+1)*each_sample_frame-1,:,:] if i>0 else v2v_input_frames[:,:,:each_sample_frame,:,:],
+            first_frame_output=out[-1] if i>0 else None,
+            prompt=testing_prompt,
+            num_inference_steps=num_inference_steps,
+            width=w,
+            height=h,
+            guidance_scale=guidance_scale,
+            generator=[torch.Generator(device="cuda").manual_seed(seed)],
+            video_scale = video_scale,  # per-frame as negative (>= 1 or set 0)
+            init_noise_by_residual_thres = init_noise_thres,    # residual-based init. larger thres ==> more smooth.
+            controlnet_conditioning_scale=1.0,
+            fix_first_frame=True,
+            in_domain=True, # whether to use the video model to generate the first frame.
+    )
+    out1 = out1.images[0][1:]    # drop the first frame
+    out.extend(out1)
 
 imageio.mimsave('demo.gif', out, fps=8)
 # import IPython

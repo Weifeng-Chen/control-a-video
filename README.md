@@ -30,6 +30,7 @@ python3 inference.py --prompt "a bear walking through stars, artstation" --input
 Args:
 - `--input_video`: path of input video(mp4 format).
 - `--num_sample_frames`: nums of frames to generate. (recommend > 8).
+- `--each_sample_frame`: sampling frames for each time. (for auto-regressive generateion.)
 - `--sampling_rate`: skip sampling from the input video.
 
 - `--control_mode`: allows for different control, currently support **`canny`, `depth`, `hed`**. (you need to download the weight of **hed** annotator from [link](https://huggingface.co/wf-genius/controlavideo-hed/resolve/main/hed-network.pth) and put it in work space.)
@@ -40,46 +41,14 @@ Args:
 
 If the automatic downloading not work, the models weights can be downloaded from: [depth_control_model](https://huggingface.co/wf-genius/controlavideo-depth), [canny_control_model](https://huggingface.co/wf-genius/controlavideo-canny), [hed_control_model](https://huggingface.co/wf-genius/controlavideo-hed).
 
-## 2. Pipeline
-### Inference
-(1) Our model firstly generates the first frame, which can be used for preview as well.
+## 2. Auto-Regressive Generation
+Our model firstly generates the first frame. Once We get the first frame, we generate the subsquent frames conditioned on the first frame. Thus, it will allow our model to generate longer videos auto-regressive. (This operation is still under experiment and it may collaspe after 3 or 4 iterations.)
 ```
-first_frame = video_controlnet_pipe(
-        controlnet_hint=control_maps[:,:,0:1,:,:],
-        prompt=testing_prompt,
-        num_inference_steps=20,
-        width=w,
-        height=h,
-        guidance_scale=10,
-        num_images_per_prompt=1,
-        generator=[torch.Generator(device="cuda").manual_seed(seed)],
-        fix_first_frame=False,
-).images[0]
-if isinstance(first_frame, list):
-    first_frame = first_frame[0]    # PIL image, can be shown in jupyter.
+python3 inference.py --prompt "a bear walking through stars, artstation" --input_video bear.mp4 --control_mode depth --num_sample_frames 16 --each_sample_frame 8
 ```
+Note that `num_sample_frames` should be multiple of `each_sample_frame`. 
 
-(2) Once We get the first frame, we generate the subsquent frames conditioned on the first frame.
-```
-out = video_controlnet_pipe(
-        controlnet_hint= control_maps[:,:,:num_each_frames,:,:],
-        images= v2v_input_frames[:,:,:num_each_frames,:,:],
-        prompt=testing_prompt,
-        num_inference_steps=20,
-        width=w,
-        height=h,
-        guidance_scale=10,
-        generator=[torch.Generator(device="cuda").manual_seed(seed)],
-        single_frame_noise_addition_scale = 1.5,        
-        first_frame_output= first_frame,   # the first frame
-        init_noise_by_residual_thres = 0.1,
-).images[0][1:] # drop the first frame
-```
-
-(3) You can set `first_frame_output=out[-1]` and generate longer videos. (Note that the `controlnet_hint` and `images` shoule be the coressponding frames, and the first item should be same as `first_frame_output`) This operation is still under experiment and it may collaspe after 3 or 4 iterations. 
-
-
-### Replace the 2d model
+## Replace the 2d model (Experimentally)
 Since we freeze the 2d model, you can replace it with any other model based on `stable-diffusion-v1-5` to generate custom-style videos. 
 
 ```
