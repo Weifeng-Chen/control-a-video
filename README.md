@@ -1,8 +1,8 @@
 # control-a-video
 <!-- <img src="basketball.gif" width="256"> -->
-Official Implementation of ["Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models"](https://arxiv.org/abs/2305.13840), which is a text-based vid2vid model, more showcases in [Project Page](https://controlavideo.github.io), [Online Demo](https://huggingface.co/spaces/wf-genius/Control-A-Video)
-
-The models and code can only be used for non-commercial/research purpose.
+Official Implementation of ["Control-A-Video: Controllable Text-to-Video Generation with Diffusion Models"](https://arxiv.org/abs/2305.13840)
+- [Project Page](https://controlavideo.github.io)
+- [Online Demo](https://huggingface.co/spaces/wf-genius/Control-A-Video)
 
 Similar to Controlnet, We otain the condition maps from another video, and we support three kinds of control maps at this time. 
 
